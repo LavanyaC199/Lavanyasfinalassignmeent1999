@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import api from "../api/api";
 
 function Register() {
   const [name, setName] = useState("");
@@ -7,49 +8,51 @@ function Register() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !email || !password) {
-      alert("Please fill all fields");
-      return;
-    }
+    try {
+      const res = await api.post("/auth/register", {
+        name,
+        email,
+        password,
+      });
 
-    alert("Registration successful (frontend)");
-    navigate("/");
+      alert(res.data.message || "Registered");
+      navigate("/");
+    } catch (err) {
+      alert("Registration failed");
+      console.log(err.response?.data || err.message);
+    }
   };
 
   return (
     <div className="register-container">
       <form className="register-card" onSubmit={handleSubmit}>
-        <h2>Create Account</h2>
-        <p>Join us today</p>
+        <h2>Register</h2>
 
         <input
           type="text"
-          placeholder="Full Name"
-          value={name}
+          placeholder="Name"
           onChange={(e) => setName(e.target.value)}
         />
 
         <input
           type="email"
           placeholder="Email"
-          value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
           type="password"
           placeholder="Password"
-          value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
         <button type="submit">Register</button>
 
-        <p style={{ textAlign: "center", marginTop: "15px" }}>
-          Already have an account? <Link to="/">Login</Link>
+        <p>
+          Already have account? <Link to="/">Login</Link>
         </p>
       </form>
     </div>

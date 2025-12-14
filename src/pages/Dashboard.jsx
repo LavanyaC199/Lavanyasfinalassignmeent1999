@@ -1,68 +1,62 @@
 import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import api from "../api/api";
 
-function Dashboard() {
-  const [customers, setCustomers] = useState([]);
+function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const addCustomer = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !email) {
-      alert("Please fill all fields");
-      return;
+    try {
+      const res = await api.post("/auth/register", {
+        name,
+        email,
+        password,
+      });
+
+      alert(res.data.message || "Registered");
+      navigate("/");
+    } catch (err) {
+      alert("Registration failed");
+      console.log(err.response?.data || err.message);
     }
-
-    setCustomers([
-      ...customers,
-      { id: Date.now(), name, email }
-    ]);
-
-    setName("");
-    setEmail("");
-  };
-
-  const deleteCustomer = (id) => {
-    setCustomers(customers.filter((c) => c.id !== id));
   };
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-card">
-        <h2>CRM Dashboard</h2>
+    <div className="register-container">
+      <form className="register-card" onSubmit={handleSubmit}>
+        <h2>Register</h2>
 
-        <form onSubmit={addCustomer}>
-          <input
-            type="text"
-            placeholder="Customer Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
+        <input
+          type="text"
+          placeholder="Name"
+          onChange={(e) => setName(e.target.value)}
+        />
 
-          <input
-            type="email"
-            placeholder="Customer Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+        <input
+          type="email"
+          placeholder="Email"
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-          <button type="submit">Add Customer</button>
-        </form>
+        <input
+          type="password"
+          placeholder="Password"
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-        <ul>
-          {customers.map((c) => (
-            <li key={c.id}>
-              <span>
-                <strong>{c.name}</strong><br />
-                <small>{c.email}</small>
-              </span>
-              <button onClick={() => deleteCustomer(c.id)}>❌</button>
-            </li>
-          ))}
-        </ul>
-      </div>
+        <button type="submit">Register</button>
+
+        <p>
+          Already have account? <Link to="/">Login</Link>
+        </p>
+      </form>
     </div>
   );
 }
 
-export default Dashboard;
+export default Register;

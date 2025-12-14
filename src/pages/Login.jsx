@@ -1,40 +1,49 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import api from "../api/api";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Login clicked");
+
+    try {
+      const res = await api.post("/auth/login", {
+        email,
+        password,
+      });
+
+      alert(res.data.message || "Login success");
+      navigate("/dashboard");
+    } catch (err) {
+      alert("Login failed");
+      console.log(err.response?.data || err.message);
+    }
   };
 
   return (
     <div className="login-container">
       <form className="login-card" onSubmit={handleSubmit}>
-        <h2>Welcome Back</h2>
-        <p>Login to continue</p>
+        <h2>Login</h2>
 
         <input
           type="email"
           placeholder="Email"
-          required
-          value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
           type="password"
           placeholder="Password"
-          required
-          value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
         <button type="submit">Login</button>
 
-        <p style={{ marginTop: "15px", textAlign: "center" }}>
+        <p>
           New user? <Link to="/register">Register</Link>
         </p>
       </form>
