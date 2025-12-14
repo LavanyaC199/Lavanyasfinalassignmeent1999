@@ -1,62 +1,68 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import api from "../api/api";
 
-function Register() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+function Dashboard() {
+  const [tasks, setTasks] = useState([]);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
 
-  const handleSubmit = async (e) => {
+  const loadTasks = async () => {
+    const res = await api.get("/tasks");
+    setTasks(res.data);
+  };
+
+  useEffect(() => {
+    loadTasks();
+  }, []);
+
+  const addTask = async (e) => {
     e.preventDefault();
 
-    try {
-      const res = await api.post("/auth/register", {
-        name,
-        email,
-        password,
-      });
+    await api.post("/tasks", { title, description });
 
-      alert(res.data.message || "Registered");
-      navigate("/");
-    } catch (err) {
-      alert("Registration failed");
-      console.log(err.response?.data || err.message);
-    }
+    setTitle("");
+    setDescription("");
+    loadTasks();
+  };
+
+  const deleteTask = async (id) => {
+    await api.delete(`/tasks/${id}`);
+    loadTasks();
   };
 
   return (
-    <div className="register-container">
-      <form className="register-card" onSubmit={handleSubmit}>
-        <h2>Register</h2>
+    <div className="task-page">
+      <div className="task-card">
+        <h2>Task Dashboard</h2>
 
-        <input
-          type="text"
-          placeholder="Name"
-          onChange={(e) => setName(e.target.value)}
-        />
+        <form className="task-form" onSubmit={addTask}>
+          <input
+            placeholder="Task title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
 
-        <input
-          type="email"
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-        />
+          <input
+            placeholder="Task description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
 
-        <input
-          type="password"
-          placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <button>Add Task</button>
+        </form>
 
-        <button type="submit">Register</button>
-
-        <p>
-          Already have account? <Link to="/">Login</Link>
-        </p>
-      </form>
+        {tasks.map((task) => (
+          <div className="task-item" key={task._id}>
+            <div>
+              <h4>{task.title}</h4>
+              <p>{task.description}</p>
+            </div>
+            <button onClick={() => deleteTask(task._id)}>Delete</button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
-export default Register;
+export default Dashboard;

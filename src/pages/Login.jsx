@@ -16,11 +16,14 @@ function Login() {
         password,
       });
 
-      alert(res.data.message || "Login success");
-      navigate("/dashboard");
-    } catch (err) {
+      console.log("Login success:", res.data);
+
+      // ✅ REDIRECT TO TASK PAGE
+      navigate("/tasks");
+
+    } catch (error) {
       alert("Login failed");
-      console.log(err.response?.data || err.message);
+      console.error(error);
     }
   };
 
@@ -33,12 +36,14 @@ function Login() {
           type="email"
           placeholder="Email"
           onChange={(e) => setEmail(e.target.value)}
+          required
         />
 
         <input
           type="password"
           placeholder="Password"
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
 
         <button type="submit">Login</button>
